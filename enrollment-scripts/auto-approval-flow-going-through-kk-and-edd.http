@@ -1,6 +1,6 @@
 
 @hostname = https://baas-dev.xendit.co
-@apiKey = to-be-replaced
+@apiKey = to-be-replaced 
 
 
 @customerId = cus-05395bd4-2aff-4b0b-9b32-b32d2e62032f
@@ -160,19 +160,6 @@ Content-Type: application/json
 }
 ###
 
-### Fufill CUSTOMER INFORMATION Requirement
-PATCH {{hostname}}/enrollments/{{enrollmentId}}/requirements/{{customerInformationRequirementId}}
-Authorization: bearer {{apiKey}}
-Content-Type: application/json
-
-{
-    "type": "DOCUMENT",
-    "document": {
-        "id": "{{selfieId}}"
-    }
-}
-###
-
 ### Upload Customer Document - Upload EDD to BaaS
 # @name eddDocument
 POST {{hostname}}/customers/{{customerId}}/documents
@@ -257,6 +244,19 @@ Content-Type: application/json
     "type": "DOCUMENT",
     "document": {
         "id": "{{kkId}}"
+    }
+}
+###
+
+### Fufill CUSTOMER INFORMATION Requirement
+PATCH {{hostname}}/enrollments/{{enrollmentId}}/requirements/{{customerInformationRequirementId}}
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+
+{
+    "type": "DOCUMENT",
+    "document": {
+        "id": "{{selfieId}}"
     }
 }
 ###
