@@ -1,0 +1,268 @@
+
+@hostname = https://baas-dev.xendit.co
+@apiKey = to-be-replaced
+
+
+@customerId = cus-05395bd4-2aff-4b0b-9b32-b32d2e62032f
+@referenceId = @bss-4000:f7207a9c-bd51-4832-91ab-0af1e5d16478 
+### Initiate enrollment for a customer
+# @name enrollment
+POST {{hostname}}/customers/{{customerId}}/enrollments
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+
+{
+    "reference_id": "{{referenceId}}",
+    "product_id": "prd-bss-6apr",
+    "purposes": [
+        "SAVINGS"
+    ]
+}
+###
+
+@enrollmentId = {{enrollment.response.body.id}}
+
+### Retrieve enrollment requirements
+GET {{hostname}}/enrollments/{{enrollmentId}}/requirements
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+###
+
+# Requirements
+@otpRequirementId = rqmt-b3Rw
+@ktpDocumentRequirementId = rqmt-a3Rw
+@selfieDocumentRequirementId = rqmt-c2VsZmll
+@customerInformationRequirementId = rqmt-aW5mbw==
+@eddDocumentRequirementId = rqmt-ZWRk
+@kkDocumentRequirementId = rqmt-a2s=
+
+### Fufill OTP Requirement
+PATCH {{hostname}}/enrollments/{{enrollmentId}}/requirements/{{otpRequirementId}}
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+
+{
+    "type": "OTP",
+    "otp": {
+        "action": "VALIDATE",
+        "code": "000000"
+    }
+}
+###
+
+### Upload Customer Document - Upload KTP to BaaS
+# @name ktpDocument
+POST {{hostname}}/customers/{{customerId}}/documents
+Authorization: bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files"; filename="ktp.jpeg"
+Content-Type: image/jpeg
+
+< ./artifacts/ktp.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="country"
+
+ID
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="type"
+
+IDENTITY_CARD
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="sub_type"
+
+NATIONAL_ID
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="reference_id"
+
+{{referenceId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+###
+
+@ktpId = {{ktpDocument.response.body.id}}
+
+### Fufill KTP Requirement
+PATCH {{hostname}}/enrollments/{{enrollmentId}}/requirements/{{ktpDocumentRequirementId}}
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+
+{
+    "type": "DOCUMENT",
+    "document": {
+        "id": "{{ktpId}}",
+        "id_ktp": {
+            "given_names": "string",
+            "id_number": "string",
+            "gender": "string",
+            "date_of_birth": "string",
+            "place_of_birth": "string",
+            "marital_status": "string",
+            "address": {
+                "category": "HOME",
+                "country": "string",
+                "street_line1": "string",
+                "street_line2": "string",
+                "rtrw": "string",
+                "sub_district": "string",
+                "district": "string",
+                "city": "string",
+                "province_state": "string",
+                "postal_code": "string",
+                "is_primary": false,
+                "is_mailing_address": false,
+                "mobile_number": "string",
+                "phone_number": "string",
+                "metadata": {}
+            }
+        }
+    }
+}
+###
+
+### Upload Customer Document - Upload SELFIE to BaaS
+# @name selfieDocument
+POST {{hostname}}/customers/{{customerId}}/documents
+Authorization: bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files"; filename="selfie.jpeg"
+Content-Type: image/jpeg
+
+< ./artifacts/ktp.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="country"
+
+ID
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="type"
+
+SELFIE
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="reference_id"
+
+{{referenceId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+###
+@selfieId = {{selfieDocument.response.body.id}}
+
+### Fufill SELFIE Requirement
+PATCH {{hostname}}/enrollments/{{enrollmentId}}/requirements/{{selfieDocumentRequirementId}}
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+
+{
+    "type": "DOCUMENT",
+    "document": {
+        "id": "{{selfieId}}"
+    }
+}
+###
+
+### Fufill CUSTOMER INFORMATION Requirement
+PATCH {{hostname}}/enrollments/{{enrollmentId}}/requirements/{{customerInformationRequirementId}}
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+
+{
+    "type": "DOCUMENT",
+    "document": {
+        "id": "{{selfieId}}"
+    }
+}
+###
+
+### Upload Customer Document - Upload EDD to BaaS
+# @name eddDocument
+POST {{hostname}}/customers/{{customerId}}/documents
+Authorization: bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files"; filename="edd.jpeg"
+Content-Type: image/jpeg
+
+< ./artifacts/edd.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="country"
+
+ID
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="type"
+
+IDENTITY_CARD
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="sub_type"
+
+FAMILY_CARD
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="reference_id"
+
+{{referenceId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+###
+@eddId = {{eddDocument.response.body.id}}
+
+### Fufill EDD Requirement
+PATCH {{hostname}}/enrollments/{{enrollmentId}}/requirements/{{eddDocumentRequirementId}}
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+
+{
+    "type": "DOCUMENT",
+    "document": {
+        "id": "{{eddId}}"
+    }
+}
+###
+
+### Upload Customer Document - Upload KK to BaaS
+# @name kkDocument
+POST {{hostname}}/customers/{{customerId}}/documents
+Authorization: bearer {{apiKey}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="files"; filename="kk.jpeg"
+Content-Type: image/jpeg
+
+< ./artifacts/ktp.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="country"
+
+ID
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="type"
+
+IDENTITY_CARD
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="sub_type"
+
+FAMILY_CARD
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="reference_id"
+
+{{referenceId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+###
+@kkId = {{kkDocument.response.body.id}}
+
+### Fufill KK Requirement
+PATCH {{hostname}}/enrollments/{{enrollmentId}}/requirements/{{kkDocumentRequirementId}}
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+
+{
+    "type": "DOCUMENT",
+    "document": {
+        "id": "{{kkId}}"
+    }
+}
+###
+
+### Retrieve enrollment status
+GET {{hostname}}/enrollments/{{enrollmentId}}
+Authorization: bearer {{apiKey}}
+Content-Type: application/json
+###
